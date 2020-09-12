@@ -47,12 +47,12 @@ export default function App() {
 
   useEffect(() => {
     const fetchData = async (period) => {
+      setIsLoading(true);
       const transactionsFromAPI = await fetchTransactions(period);
       setMonthlyTransactions(transactionsFromAPI);
+      setIsLoading(false);
     };
-    setIsLoading(true);
     fetchData(selectedPeriod);
-    setIsLoading(false);
   }, [selectedPeriod]);
 
   function addTransaction(newTransaction) {
