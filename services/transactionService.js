@@ -11,7 +11,7 @@ const padded = (number) => number.toString().padStart(2, '0');
 const retrieveTransactions = async (req, res) => {
   const { period } = req.query;
   if (!period) {
-    res.send({
+    res.status(400).send({
       error:
         'É necessário informar o parâmetro "period", cujo valor deve estar no formato yyyy-mm.',
     });

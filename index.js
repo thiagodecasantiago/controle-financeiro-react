@@ -5,6 +5,8 @@ import routes from './routes/routes.js';
 import path from 'path';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
+import swaggerUI from 'swagger-ui-express';
+import { swaggerDocument } from './assets/docs/doc.js';
 
 /**
  * Faz a leitura do arquivo
@@ -28,16 +30,26 @@ app.use(express.static(path.join(__dirname, 'client/build')));
 app.get('/api/', (_, response) => {
   response.send({
     message:
-      'Bem-vindo à API de lançamentos. Acesse /transaction e siga as orientações',
+      'Bem-vindo à API de lançamentos. Acesse /docs e veja a documentação',
   });
 });
 
 /**
- * Rota de erro
+ * Rota da documentação
+ */
+app.use('/api/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
+
+/**
+ * Rotas de erro
  */
 app.get('/transaction/', (_, response) => {
   response.send({
     message: "Você quis dizer '/api/transaction' ? ",
+  });
+});
+app.get('/docs/', (_, response) => {
+  response.send({
+    message: "Você quis dizer '/api/docs' ? ",
   });
 });
 
