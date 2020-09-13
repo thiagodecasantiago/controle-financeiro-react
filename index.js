@@ -41,6 +41,17 @@ app.get('/transaction/', (_, response) => {
   });
 });
 
+const dbConnectionMiddleware = function (_, res, next) {
+  if (connectedToMongoDB) next();
+  else {
+    res.status(404).send({
+      error: 'O serviço não está conectado ao banco de dados.',
+    });
+  }
+};
+
+app.use(dbConnectionMiddleware);
+
 /**
  * Rotas principais do app
  */
@@ -73,13 +84,12 @@ const { connection } = mongoose;
 connection.once('open', () => {
   connectedToMongoDB = true;
   console.log('Conectado ao MongoDB');
-
-  /**
-   * Definição de porta e
-   * inicialização do app
-   */
-  const APP_PORT = process.env.PORT || 3001;
-  app.listen(APP_PORT, () => {
-    console.log(`Servidor iniciado na porta ${APP_PORT}`);
-  });
+});
+/**
+ * Definição de porta e
+ * inicialização do app
+ */
+const APP_PORT = process.env.PORT || 3001;
+app.listen(APP_PORT, () => {
+  console.log(`Servidor iniciado na porta ${APP_PORT}`);
 });
