@@ -11,10 +11,12 @@ export async function fetchPeriods() {
     return periods.data;
   } catch (error) {
     console.error(error);
+    throw error;
   }
 }
 
 export async function fetchTransactions(period) {
+  if (!period) return [];
   try {
     const transactions = await api.get(`${RESOURCE}?period=${period}`);
     if (transactions.data.error) throw new Error(transactions.data.error);
@@ -25,7 +27,7 @@ export async function fetchTransactions(period) {
     return sortedTransactions;
   } catch (error) {
     console.error(error);
-    return [];
+    throw error;
   }
 }
 

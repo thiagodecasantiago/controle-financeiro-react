@@ -33,11 +33,21 @@ export default function App() {
   const [isFiltering, setIsFiltering] = useState(false);
   const [filter, setFilter] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isConnecting, setIsConnecting] = useState(true);
+  const [connectError, setConnectError] = useState('');
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
-      const periodsFromAPI = await fetchPeriods();
-      setPeriods(periodsFromAPI);
+      setConnectError('');
+      try {
+        const periodsFromAPI = await fetchPeriods();
+        setPeriods(periodsFromAPI);
+      } catch {
+        setConnectError('Erro de conexão ao servidor de dados');
+      } finally {
+        setIsConnecting(false);
+      }
     };
     fetchData();
     const now = new Date();
@@ -48,9 +58,15 @@ export default function App() {
   useEffect(() => {
     const fetchData = async (period) => {
       setIsLoading(true);
-      const transactionsFromAPI = await fetchTransactions(period);
-      setMonthlyTransactions(transactionsFromAPI);
-      setIsLoading(false);
+      setLoadError('');
+      try {
+        const transactionsFromAPI = await fetchTransactions(period);
+        setMonthlyTransactions(transactionsFromAPI);
+      } catch {
+        setLoadError('Erro ao carregar os dados');
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData(selectedPeriod);
   }, [selectedPeriod]);
@@ -101,22 +117,52 @@ export default function App() {
     edit: handleEditSubmission,
   };
 
-  return (
-    <div className="container" style={{ marginBottom: '20px' }}>
-      <div className="center">
-        <h3>Desafio Final do Bootcamp Full Stack</h3>
-        <h5>Controle Financeiro Pessoal</h5>
-      </div>
-      <MonthSelect
-        periods={periods}
-        selectedPeriod={selectedPeriod}
-        setSelectedPeriod={setSelectedPeriod}
-      />
-      {isLoading ? (
+  const renderPreConnect = () => {
+    if (isConnecting) {
+      return (
         <div className="center">
           <Loading />
         </div>
-      ) : (
+      );
+    } else if (connectError) {
+      return (
+        <div className="center">
+          <br /> <br /> <br />
+          <p>{connectError}</p>
+          <br /> <br /> <br />
+        </div>
+      );
+    } else {
+      return (
+        <>
+          <MonthSelect
+            periods={periods}
+            selectedPeriod={selectedPeriod}
+            setSelectedPeriod={setSelectedPeriod}
+          />
+          {renderPostConnect()}
+        </>
+      );
+    }
+  };
+
+  const renderPostConnect = () => {
+    if (isLoading) {
+      return (
+        <div className="center">
+          <Loading />
+        </div>
+      );
+    } else if (loadError) {
+      return (
+        <div className="center">
+          <br /> <br /> <br />
+          <p>{loadError}</p>
+          <br /> <br /> <br />
+        </div>
+      );
+    } else {
+      return (
         <>
           <Summary transactions={filteredTransactions} />
           <div className="input-field" style={styles.flexBetween}>
@@ -137,7 +183,17 @@ export default function App() {
             transactions={filteredTransactions}
           />
         </>
-      )}
+      );
+    }
+  };
+
+  return (
+    <div className="container" style={{ marginBottom: '20px' }}>
+      <div className="center">
+        <h3>Desafio Final do Bootcamp Full Stack</h3>
+        <h5>Controle Financeiro Pessoal</h5>
+      </div>
+      {renderPreConnect()}
     </div>
   );
 }
